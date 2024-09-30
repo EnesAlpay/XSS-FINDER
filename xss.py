@@ -7,61 +7,60 @@ def load_payloads(file_path):
         with open(file_path, 'r') as file:
             return [line.strip() for line in file.readlines() if line.strip()]
     except FileNotFoundError:
-        messagebox.showerror("Hata", f"Dosya bulunamadı: {file_path}")
+        messagebox.showerror("Error", f"File not found: {file_path}")
         return []
 
 def test_xss():
     url = entry_url.get()
     param_name = entry_param.get()
-    payloads = load_payloads('payloads.txt')  # Payload dosyasını yükle
+    payloads = load_payloads('payloads.txt')  # Load payload file
 
-    results_text.delete(1.0, tk.END)  # Önceki sonuçları temizle
-    found_xss = False  # XSS açığı bulunup bulunmadığını kontrol etmek için
+    results_text.delete(1.0, tk.END)  # Clear previous results
+    found_xss = False  # Check if XSS vulnerability is found
 
     for payload in payloads:
         try:
             response = requests.get(url, params={param_name: payload})
             if payload in response.text:
-                results_text.insert(tk.END, f"[!] XSS açığı bulundu: {payload}\n")
+                results_text.insert(tk.END, f"[!] XSS vulnerability found: {payload}\n")
                 found_xss = True
-                break  # İlk açık bulunduğunda döngüden çık
+                break  # Exit loop after first vulnerability found
         except Exception as e:
-            messagebox.showerror("Hata", f"İstek gönderilirken hata oluştu: {e}")
+            messagebox.showerror("Error", f"An error occurred while sending the request: {e}")
 
     if not found_xss:
-        results_text.insert(tk.END, "[+] XSS açığı bulunamadı\n")
+        results_text.insert(tk.END, "[+] No XSS vulnerability found\n")
 
-# Tkinter arayüzü oluşturma
+# Create Tkinter interface
 root = tk.Tk()
-root.title("XSS Tespit Aracı")
+root.title("XSS Detection Tool")
 
-# Koyu tema renkleri
+# Dark theme colors
 bg_color = "#2e2e2e"
 fg_color = "#ffffff"
 entry_bg_color = "#3e3e3e"
 btn_bg_color = "#4e4e4e"
 
-# Arka plan rengini ayarlama
+# Set background color
 root.configure(bg=bg_color)
 
-# URL Girişi
-tk.Label(root, text="Hedef URL:", bg=bg_color, fg=fg_color).pack()
+# URL Entry
+tk.Label(root, text="Target URL:", bg=bg_color, fg=fg_color).pack()
 entry_url = tk.Entry(root, width=50, bg=entry_bg_color, fg=fg_color, insertbackground=fg_color)
 entry_url.pack(pady=5)
 
-# Parametre Adı Girişi
-tk.Label(root, text="Parametre Adı:", bg=bg_color, fg=fg_color).pack()
+# Parameter Name Entry
+tk.Label(root, text="Parameter Name:", bg=bg_color, fg=fg_color).pack()
 entry_param = tk.Entry(root, width=50, bg=entry_bg_color, fg=fg_color, insertbackground=fg_color)
 entry_param.pack(pady=5)
 
-# Test Butonu
-btn_test = tk.Button(root, text="Test Et", command=test_xss, bg=btn_bg_color, fg=fg_color)
+# Test Button
+btn_test = tk.Button(root, text="Test", command=test_xss, bg=btn_bg_color, fg=fg_color)
 btn_test.pack(pady=10)
 
-# Sonuçları Gösterme Alanı
+# Results Display Area
 results_text = scrolledtext.ScrolledText(root, width=60, height=20, bg=entry_bg_color, fg=fg_color, insertbackground=fg_color)
 results_text.pack(pady=10)
 
-# Arayüzü başlat
+# Start the interface
 root.mainloop()
-
